@@ -2,7 +2,8 @@ module GridGraph
 
 export getRelNghInd
 
-include("AbstractVarGraph")
+include("AbstractVarGraph.jl")
+using.AbstractVarGraph
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #Get assciated neighbors
 function getRelNghInd(direction::String, dimDomain::Integer, sR::Integer)
@@ -53,11 +54,11 @@ end
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #Code
-function computePatchDistance2D(data1::ProblemData, data2::ProblemData, ngh::Neighborhood, 
+function computePatchDistance2D(data1::ProblemData, data2::ProblemData, ngh::Neighborhood,
                                 wFct::WeightFunction, dFct::DistanceFunction )
   sR = ngh.searchRadius
   pR = ngh.patchRadius
-  
+
   k = 0;
   max_size = (2*sR + 1)^data1.dimDomain;
   padding = sR + pR;

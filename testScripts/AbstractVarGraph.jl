@@ -1,4 +1,6 @@
 module AbstractVarGraph
+
+export ProblemData, WeightFunction, DistanceFunction, Neighborhood
 #--------------------------------------------------------------------
 struct ProblemData
   nType::String

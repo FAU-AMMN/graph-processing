@@ -3,8 +3,8 @@ using Colors
 include("AbstractVarGraph.jl")
 include("VarGraph.jl")
 
-using.AbstractVarGraph
-using .VarGraph
+using .AbstractVarGraph
+using.VarGraph
 
 
 
@@ -20,7 +20,3 @@ data = ProblemData("grid",2,3,img_2)
 
 
 b = constructGraph(data,ngh,distFct,wFct)
-
-
-
-

@@ -1,13 +1,12 @@
 module VarGraph
 using SimpleWeightedGraphs
 
-export constructGraph, 
-       ProblemData, 
-       WeightFunction, DistanceFunction, Neighborhood
-include("AbstractVarGraph")
-       
+export constructGraph
+include("AbstractVarGraph.jl")
+using Main.AbstractVarGraph: ProblemData, WeightFunction, DistanceFunction, Neighborhood
+
 include("GridGraph.jl")
-using. GridGraph
+using .GridGraph
 
 
 
@@ -21,12 +20,12 @@ function constructGraph(data::ProblemData, ngh::Neighborhood, distFct::DistanceF
     #----------------------------------------------------------------
     #Define useful values
     numOfVerts = div(length(data.f),data.dimRange)
-    numOfNgh = length(relNghInd) 
+    numOfNgh = length(relNghInd)
     numOfEdges = numOfVerts * numOfNgh
-    
-    
-    
-    
+
+
+
+
     g = SimpleWeightedDiGraph(numOfVerts)
   else
     error("Unsupported neighborhood type!")
@@ -35,13 +34,3 @@ function constructGraph(data::ProblemData, ngh::Neighborhood, distFct::DistanceF
 end
 
 end
-
-
-
-
-    
-
-
-
-
-
