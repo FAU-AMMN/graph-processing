@@ -1,9 +1,7 @@
 using FileIO
 using Colors
-include("AbstractVarGraph.jl")
 include("VarGraph.jl")
 
-using .AbstractVarGraph
 using.VarGraph
 
 
@@ -13,10 +11,10 @@ img_2 = cat(red.(img), green.(img), blue.(img);dims = 3)
 f() = "dummy"
 
 
-ngh = Neighborhood("grid","full",1,0)
-distFct = DistanceFunction(f,f,"dummy")
-wFct = WeightFunction(0,f)
-data = ProblemData("grid",2,3,img_2)
+ngh = Dict([("nType","grid"),("direction","full"),("searchRadius",1),("patchRadius",0)])
+distFct = Dict([("innerNorm",f),("outerNorm",f),("padMethod","dummy")])
+wFct = Dict([("sigma",0),("fct",f)])
+data = Dict([("nType","grid"),("dimDomain",2),("dimRange",3),("f",img_2)])
 
 
 b = constructGraph(data,ngh,distFct,wFct)

@@ -1,9 +1,17 @@
 module GridGraph
 
-export getRelNghInd
+using ImageFiltering: Pad, padarray
 
-include("AbstractVarGraph.jl")
-using.AbstractVarGraph
+export getRelNghInd, computePatchDistance2D
+
+
+function integralImage(A::AbstractArray)
+  intImage = zeros(size(A,1) + 1, size(A,2) + 1)
+  intImage[2:end, 2:end] = cumsum(cumsum(A,dims = 1), dims = 2)
+  return intImage
+end
+
+
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #Get assciated neighbors
 function getRelNghInd(direction::String, dimDomain::Integer, sR::Integer)
@@ -54,13 +62,71 @@ end
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #Code
-function computePatchDistance2D(data1::ProblemData, data2::ProblemData, ngh::Neighborhood,
-                                wFct::WeightFunction, dFct::DistanceFunction )
-  sR = ngh.searchRadius
-  pR = ngh.patchRadius
-
+function computePatchDistance2D(data1::Dict, data2::Dict, ngh::Dict,
+                                wFct::Dict, dFct::Dict )
+  # Input
+  sR = ngh["searchRadius"]
+  pR = ngh["patchRadius"]
+  innerNorm = dFct["innerNorm"]
+  outerNorm = dFct["outerNorm"]
+  #
   k = 0;
-  max_size = (2*sR + 1)^data1.dimDomain;
+  max_size = (2*sR + 1)^data1["dimDomain"];
   padding = sR + pR;
+  # initialize containers to save distances and offsets of neighbors
+  distances = Array{Float64}(undef, data1["ny"], data1["nx"], max_size + k, 1)
+  offsets = Array{Float64}(undef, data1["ny"], data1["nx"], max_size + k, 2)
+  # 
+  f1 = padarray(data1["f"], Pad(:replicate,pR,pR))
+  f2 = padarray(data2["f"], Pad(:replicate,padding,padding))
+  # left top corner of img
+  ltX = ltY = pR + 1 + 1
+  #right bottom corner of Image
+  rbX = ltX + data1["nx"] - 1
+  rbY = ltY + data1["ny"] - 1
+  #------------------------------------------------------------------
+  # Loop over all shifts in x and y direction
+  for x_shift = - sR:sR
+    it_x = x_shift + sR + 1
+    # left and right index in data2
+    data2_lX = -padding + 2 + x_shift
+    data2_rX = pR + data2["nx"] + x_shift
+    #----------------------------------------------------------------
+    for y_shift = -sR:sR
+      it_y = y_shift + sR + 1
+      # top and bottom index in data2
+      data2_tY = -padding + 2 + y_shift
+      data2_bY = pR + data2["ny"] + y_shift
+      #Restircted data1
+      f2_restricted = f2[data2_tY:data2_bY, data2_lX:data2_rX]
+      diffsMatrix = innerNorm(f2_restricted - parent(f1))
+      integral_images = integralImage(diffsMatrix)
+      #
+      yRange = ((ltY + pR) : (rbY + pR)) 
+      yRange2 = ((ltY + pR - 2 * pR - 1) : (rbY+ pR - 2 * pR - 1)) 
+      xRange = ((ltX + pR) : (rbX + pR)) 
+      xRange2 = ((ltX + pR - 2 * pR - 1) : (rbX + pR - 2 * pR - 1))
+      #
+      intImgDiffSums = 
+        integral_images[yRange, xRange]# lower right corner
+      - integral_images[yRange2, xRange]# upper right corner
+      - integral_images[yRange, xRange2]# lower left corner
+      + integral_images[yRange2, xRange2]# upper left corner
+      #
+      intImgDiffSums = outerNorm(intImgDiffSums);
+      #
+      iteration_mod = mod((it_x - 1) * (sR * 2 + 1) + it_y - 1, max_size) + 1
+      #
+      for i = 1:data1["ny"], j = 1:data1["nx"]
+        offsets[i,j,iteration_mod + k,1] = y_shift
+        offsets[i,j,iteration_mod + k,2] = x_shift
+      end
+      # save distances
+      distances[:,:,iteration_mod + k] = intImgDiffSums
+    end
+  end
+
+      
 end
+
 end
