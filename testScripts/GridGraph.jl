@@ -4,12 +4,53 @@ using ImageFiltering: Pad, padarray
 
 export getRelNghInd, computePatchDistance2D
 
-
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function integralImage(A::AbstractArray)
   intImage = zeros(size(A,1) + 1, size(A,2) + 1)
   intImage[2:end, 2:end] = cumsum(cumsum(A,dims = 1), dims = 2)
   return intImage
 end
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+"""
+COMPUTEINDEXFROMOFFSET Computes neighbor indices and subscripts from 
+ reference offsets.
+ This function computes for a given set of offset vectors the
+ corresponding subscripts and linear indices with respect to the specified
+ padding boundary conditions.
+
+   Input: offsets     - matrix containing the relative neighbor offsets 
+                        from their respective reference grid points;
+          data        - data struct; should be defined in graph setting script
+          k           - number of neighbors per grid point
+          pad_method  - the user defined boundary conditions for padding
+
+   Output: subscripts - matrix containing the absolute neighbor subscripts
+           indices    - matrix containing the absolute neighbor indices
+"""
+function computeIndexFromOffset(offsets::AbstractArray, data::Dict, k::Integer, pad_method::String)
+  #
+  if padMethod != "replicate"
+    error("Unsupported padMethod!")
+  end
+  # extract variables for convenience
+  nx = data["nx"];
+  ny = data["ny"];
+  # check if grid data is three dimensional
+  if data["dimDomain"] == 3
+    # extract variables for convenience
+    nz = data["nz"];
+    ndims = data["dimDomain"];
+  else # no third dimension
+    #set variables for convenience
+    nz = 1;
+    ndims = 2;
+  end
+  # generate a meshgrid according to dimensions of data domain
+end
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -61,9 +102,12 @@ end
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#Code
 function computePatchDistance2D(data1::Dict, data2::Dict, ngh::Dict,
                                 wFct::Dict, dFct::Dict )
+  #
+  if ngh["padMethod"] != "replicate"
+    error("Unsupported padMethod!")
+  end
   # Input
   sR = ngh["searchRadius"]
   pR = ngh["patchRadius"]
@@ -125,8 +169,8 @@ function computePatchDistance2D(data1::Dict, data2::Dict, ngh::Dict,
       distances[:,:,iteration_mod + k] = intImgDiffSums
     end
   end
-
-      
+  return indices, distances
 end
-
+#End computePatchDistance2D
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end

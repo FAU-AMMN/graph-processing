@@ -20,8 +20,8 @@ end
 
 display("Hello there!")
 
-ngh = Dict([("nType","grid"),("direction","full"),("searchRadius",1),("patchRadius",2)])
-dFct = Dict([("innerNorm",innerNorm),("outerNorm",outerNorm),("padMethod","dummy")])
+ngh = Dict([("nType","grid"),("direction","full"),("searchRadius",1),("patchRadius",2),("padMethod","replicate")])
+dFct = Dict([("innerNorm",innerNorm),("outerNorm",outerNorm)])
 wFct = Dict([("sigma",0),("fct",innerNorm)])
 data = Dict([("nType","grid"),("dimDomain",2),("dimRange",3),("f",img_3), 
              ("nx", size(img_3,1)), ("ny", size(img_3,2))])
