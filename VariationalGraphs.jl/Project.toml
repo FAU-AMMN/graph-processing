@@ -1,0 +1,8 @@
+name = "VariationalGraphs"
+uuid = "a2f2aaf2-3467-11e9-2683-07b3c1e0ce69"
+authors = ["aj31ikug "]
+version = "0.1.0"
+
+[deps]
+NearestNeighbors = "b8a86587-4115-5ab1-83bc-aa920d37bbce"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
