@@ -63,6 +63,25 @@ end
 ###############################################################################
 
 """
+    get_alt_edgerep
+Get alternative edge representation.
+"""
+function get_alt_edgerep(g::VariationalGraph) 
+    edges = Array{Int64, 2}(undef, 2, g.num_edges)
+    i = 1
+    for u = 1:length(g.edges)
+        for v = 1:length(g.edges[u])
+            edges[1, i] = u
+            edges[2, i] = g.edges[u][v]
+            i += 1
+        end
+    end
+    return edges
+end
+
+###############################################################################
+
+"""
     undirect
 Undirect a directed Graph in a *very* inefficent fashion.
 """

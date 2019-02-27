@@ -1,33 +1,40 @@
 ###############################################################################
 
-function generate_flowgraph_aniso(d::Int64, f0::Array{T, 1}, w0::Array{U, 1}, f::Array{T, 1}, g::VariationalGraph, alpha::T) where {T <: Real, U <: Real}
-    N = length(f)
+function generate_flowgraph_aniso(d::Int64, f0::Array{T, 1}, w0::Array{T, 1}, f::Array{T, 1}, 
+                                  g::VariationalGraph, alpha::T) where {T <: Real}
+    N = d * g.num_verts
+    gradJS = zeros(d * g.num_verts)
+    Sc = falses(d * g.num_edges)
     flowgraph = DiGraph(N + 2)
     capacity_matrix = spzeros(N + 2, N + 2)
+    #
     for i = 1:d
-        off = (i - 1) * g.num_verts
+        off  = (i - 1) * g.num_verts
         for u = 1:g.num_verts
             acc = 0
             for v = 1:length(g.edges[u])
-                tmp = abs(f[u + off] - f[v + off])
-                if tmp >= 1e-10
+                tmp = f[u + off] - f[g.edges[u][v] + off]
+                if abs(tmp) >= 1e-10
                     acc += sign(tmp) * w0[u]
                 else
-                    add_edge!(flowgraph, u + off, v + off)
-                    capacity_matrix[u + off, v + off] = 0.5 * alpha * w0[u]
+                    add_edge!(flowgraph, u, g.edges[u][v])
+                    capacity_matrix[u + off, g.edges[u][v] + off] = 
+                        0.5 * alpha * w0[u]
+                    Sc[ect + off] = true
                 end
+                ect += 1
             end
-            gradJS = f[u + off] - f0[u + off] + alpha * acc 
-            if gradJS >= 0
+            gradJS[u] = grad = f[u + off] - f0[u + off] + alpha * acc 
+            if grad >= 0
                 add_edge!(flowgraph, N + 1, u + off)
-                capacity_matrix[N + 1, u + off] = gradJS
+                capacity_matrix[N + 1, u + off] = grad
             else
                 add_edge!(flowgraph, u + off, N + 2)
-                capacity_matrix[u + off, N + 2] = gradJS
+                capacity_matrix[u + off, N + 2] = -grad
             end
         end
     end
-    return flowgraph, capacity_matrix
+    return flowgraph, capacity_matrix, gradJS, Sc
 end
 
 ###############################################################################

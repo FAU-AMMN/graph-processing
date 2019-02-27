@@ -21,3 +21,16 @@
     @test B == B'
     @test 0.5*(A + A') == B
 end
+
+@testset "comparison" begin
+    num_nghs = 5
+    #------------------------------------------------
+    inner_norm(x) = x.^2
+    outer_norm(x) = sqrt(x)
+    w_fct(x) = 1 ./ (x.^2)
+    #------------------------------------------------
+    ngh = Dict([("nType", "knn"), ("num_nghs", num_nghs)])
+    distFct = Dict([("inner_norm", inner_norm), ("outer_norm", outer_norm)])
+    wFct = Dict([("sigma", 0), ("fct", w_fct)])
+    data = Dict([("type", "point_cloud"), ("dimDomain", dim_domain), ("dimRange", 1),("points", POINTS_2D)])
+end
