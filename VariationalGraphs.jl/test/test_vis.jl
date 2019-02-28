@@ -6,7 +6,7 @@ inner_norm(x) = x.^2
 outer_norm(x) = sqrt(x)
 w_fct(x) = 1 ./ (x.^2)
 #------------------------------------------------
-ngh = Dict([("nType", "knn"), ("direction", "full"), ("searchRadius", 1), ("num_nghs", num_nghs), ("epsilon", epsilon)])
+ngh = Dict([("nType", "epsilon"), ("direction", "full"), ("searchRadius", 1), ("num_nghs", num_nghs), ("epsilon", epsilon)])
 distFct = Dict([("inner_norm", inner_norm), ("outer_norm", outer_norm)])
 wFct = Dict([("sigma", 0), ("fct", w_fct)])
 data = Dict([("type", "point_cloud"), ("dimDomain", dim_domain), ("dimRange", 1), ("f", F),("points", points)])

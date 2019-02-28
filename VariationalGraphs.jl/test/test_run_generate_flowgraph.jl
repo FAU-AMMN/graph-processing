@@ -1,12 +1,14 @@
+using DelimitedFiles
 using VariationalGraphs
+using LightGraphs
 #------------------------------------------------
 display("Finished loading!")
 #------------------------------------------------
 d = 3
 dim_domain = 2
-num_pts = 1000
-const POINTS = rand(dim_domain, num_pts)
-
+num_pts = N = 50
+# const POINTS = rand(dim_domain, num_pts)
+const POINTS = readdlm("points.txt", Float64)
 #------------------------------------------------
 num_nghs = 3
 epsilon = 1
@@ -27,6 +29,15 @@ data = randn(g.num_verts,d)
 data = data .- minimum(data)
 data = data./maximum(data)
 const W = ones(g.num_edges)
-const F = data[:]
-
+#const F = data[:]
+tmp = readdlm("F.txt", Float64)
+const f0 = reshape(tmp,150)
+F = similar(f0)
+for i = 1:d
+    mean = sum(f0[((i - 1) * N + 1):(i* N)])/N
+    for j = ((i - 1) * N + 1):(i* N)
+        F[j] = mean
+    end
+end
+#------------------------------------------------
 include("test_generate_flowgraph.jl")

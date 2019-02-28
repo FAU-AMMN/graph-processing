@@ -7,7 +7,7 @@ using LightGraphsFlows
 import LightGraphsFlows: 
 mincut
 import LightGraphs:
-DiGraph, add_edge!
+DiGraph, AbstractGraph, add_edge!, rem_edge!, edges
 
 import NearestNeighbors: 
 KDTree, BallTree, BruteTree, knn, inrange

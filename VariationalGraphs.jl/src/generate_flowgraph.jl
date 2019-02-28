@@ -7,6 +7,7 @@ function generate_flowgraph_aniso(d::Int64, f0::Array{T, 1}, w0::Array{T, 1}, f:
     Sc = falses(d * g.num_edges)
     flowgraph = DiGraph(N + 2)
     capacity_matrix = spzeros(N + 2, N + 2)
+    ect = 1
     #
     for i = 1:d
         off  = (i - 1) * g.num_verts
@@ -20,11 +21,12 @@ function generate_flowgraph_aniso(d::Int64, f0::Array{T, 1}, w0::Array{T, 1}, f:
                     add_edge!(flowgraph, u, g.edges[u][v])
                     capacity_matrix[u + off, g.edges[u][v] + off] = 
                         0.5 * alpha * w0[u]
-                    Sc[ect + off] = true
+                    Sc[ect] = true
                 end
                 ect += 1
             end
-            gradJS[u] = grad = f[u + off] - f0[u + off] + alpha * acc 
+            grad = f[u + off] - f0[u + off] + alpha * acc 
+            gradJS[u] = grad
             if grad >= 0
                 add_edge!(flowgraph, N + 1, u + off)
                 capacity_matrix[N + 1, u + off] = grad
