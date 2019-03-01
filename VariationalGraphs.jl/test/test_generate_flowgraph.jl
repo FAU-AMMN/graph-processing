@@ -1,2 +1,2 @@
-f, c = generate_flowgraph(d, f0, W, F, g, alpha, "aniso")
-cutpursuit(d, f0, g, W, "aniso", alpha, 5);
+display("started cutpursuit")
+cutpursuit(d, f0, g, W, alpha, 5, cut_aniso());

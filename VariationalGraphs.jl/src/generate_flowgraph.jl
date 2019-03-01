@@ -1,7 +1,7 @@
 ###############################################################################
 
-function generate_flowgraph_aniso(d::Int64, f0::Array{T, 1}, w0::Array{T, 1}, f::Array{T, 1}, 
-                                  g::VariationalGraph, alpha::T) where {T <: Real}
+function generate_flowgraph(d::Int64, f0::Array{T, 1}, w0::Array{T, 1}, f::Array{T, 1}, 
+                                  g::VariationalGraph, alpha::T, reg::reg_aniso) where {T <: Real}
     N = d * g.num_verts
     gradJS = zeros(d * g.num_verts)
     Sc = falses(d * g.num_edges)
@@ -20,7 +20,7 @@ function generate_flowgraph_aniso(d::Int64, f0::Array{T, 1}, w0::Array{T, 1}, f:
                 else
                     add_edge!(flowgraph, u, g.edges[u][v])
                     capacity_matrix[u + off, g.edges[u][v] + off] = 
-                        0.5 * alpha * w0[u]
+                        (1/2) * alpha * w0[u]
                     Sc[ect] = true
                 end
                 ect += 1
@@ -41,77 +41,83 @@ end
 
 ###############################################################################
 
-function generate_flowgraph_iso(f0::Array{T, 1}, w0::Array{U, 1}, f::Array{T, 1}, g::VariationalGraph, alpha) where {T <: Real, U <: Real}
-    (N,d) = size(f);
-#         gradRS = zeros(size(f));
-#         
-#         % Compute the 2-norm of (f(u)-f(v))
-#         R = sqrt(sum((f(E(:,1),:)-f(E(:,2),:)).^2,2));
-#         R(abs(R)<1e-10) = 0;
-#         
-#         % Get the set of diffable parts of the regularizer S
-#         S = R~=0;
-#         
-#         % Compute the gradient of the diffable parts of R
-#         for i=1:d
-#             gradRS(:,i) = accumarray(E(S,1),w0(S).*(f(E(S,1),i)-f(E(S,2),i))./R(S),[N,1]);
-#         end
-#         
-#         % Gradient of diffable parts of J
-#         gradJS = (f-f0) + alpha*gradRS;
-#         
-#         % Add the nodes to the graph
-#         G = digraph;
-#         G = G.addnode(N);
-#         
-#         % Add sink and source to graph
-#         G = G.addnode('s'); % Position: N+1
-#         G = G.addnode('t'); % Position: N+2
-#         
-#         % Compute the sum of the gradient of JS over the dimensions
-#         sumgradJS = sum(gradJS,2);
-#         
-#         % Find the positive and negative entries of gradient J_S
-#         ind_pos = find(sumgradJS>0);
-#         ind_neg = find(sumgradJS<=0);
-#         
-#         % Add the edges as written in paper 
-#         G = addedge(G,N+1,ind_pos,sumgradJS(ind_pos));
-#         G = addedge(G,ind_neg,N+2, -sumgradJS(ind_neg));
-#         
-#         % Add edges between the nodes where R is non-diffable
-#         if ~isempty(~S)
-#             G = addedge(G,E(~S,1),E(~S,2),1/2*alpha*sqrt(d*w0(~S)));
-#         end
-end
-
-###############################################################################
-
 """
-    generate_flowgraph
-    
+```julia
+    generate_flowgraph(d, f0, w0, f, g, alpha, reg)
+```
 This function generates the flow graph for anisotropic and isotropic TV
-regularisation as described in the paper
+regularisation as described in the paper.
 
-Syntax:  G = GenerateFlowGraph(f0,w0,f,E,alpha,type)
+# Details
+ToDO
 
-# Inputs:
-- f0      Initial input data 
-- w0      Initial weights 
-- f       Current iterated data f^k
-- E       Given edgeset 
-- alpha   Regularization parameter
-- type    Type of regularization R ['iso', 'aniso'];
+# Arguments
+This section describes the arguments that can be passed to this function.
+
+## Data f0
+The initial input data as Array{T, 1} where T <: Real. At this stage 
+multidimensional input has to be reshaped into this format, which might change 
+later.
+- typeof(f0) = Array{T, 1} where T <: Real
+
+## Weights w0
+The initial weights.
+- typeof(w0) = Array{T, 1} where T <: Real
+
+## Data f
+Current iterated data f^k as . At this stage 
+multidimensional input has to be reshaped into this format, which might change 
+later.
+- typeof(f) = Array{T, 1} where T <: Real
+
+## Variational Graph g
+This variable stores the underlying graph, the algorithm should be 
+performed on. 
+- typeof(g) =  VariationalGraph{T} where T <: Real.
+
+## alpha
+Regularization parameter.
+- typeof(alpha) = T where T <: Real.
+
+## reg 
+This parameter allows to dispatch to different choices of regularization types for 
+the algorithm. The possible options are listed below.
+- typeof(reg) <: reg_type
+
+## reg_aniso()
+ToDO
+
+## reg_iso
+Curently unsupported.
+
+## Some basic requirements
+- length(w0) = g.num_edges
+- length(f0) = length(f) = g.num_verts
+
+# Output
+This section describes the output of the algorithm.
+
+## flowgraph
+The resulting graph of the algorithm.
+- typeof(flowgraph) = LightGraphs.DiGraph{U} where {U <: Int}
+
+## capacity_matrix
+Sparse matrix that storse the capacities corrensponding to the edges of
+the flowgraph.
+- typeof(capacity_matrix) = SparseMatrixCSC{U, T} where {U <: Int, T <: Real}
+## gradJS
+ToDO
+- typeof(gradJS) = Array{T, 1} where T <: Real
+
+## Sc
+Array that stores wheter a corresponding edge produces a zero value.
+- typeof(Sc) = Array{Bool, 1}
+
+## Some basic properties
+- length(Sc) = g.num_edges = nnz(capacity_matrix)
+- length(gradJS) = g.num_verts 
+
+# Examples
+ToDo
 """
-function generate_flowgraph(d::Int64, f0::Array{T, 1}, w0::Array{U, 1}, f::Array{T, 1}, 
-g::VariationalGraph, alpha::T, type_R::String) where {T <: Real, U <: Real}
-    # Generate the flow graph for the anisoropic or isotropic regularizer R
-    if type_R == "aniso"
-        generate_flowgraph_aniso(d, f0, w0, f, g, alpha)
-    elseif type_R == "iso"
-        error("Currently unsupported!")
-        generate_flowgraph_iso(d, f0, w0, f, g, alpha)
-    else
-        error("Unsupported type for regularizer")
-    end
-end
+generate_flowgraph
