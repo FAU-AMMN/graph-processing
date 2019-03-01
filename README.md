@@ -1,13 +1,10 @@
 # VariationalGraphs.jl
 Implemantation of some algorithms concerning variational problems on graphs.
 
-## Basic functionality
+## Graph generators
 ToDo
-
-### Graph generators
-ToDo
-### Graph algorithms
-#### Cut pursuit
+## Graph algorithms
+### Cut pursuit
 Procedure for a cut pursuit algorithm with a primal dual approach
 ```jl
     cutpursuit(d, f0, g, w, cutAlpha, nIter, cut)
@@ -53,4 +50,4 @@ Perform an anisotropic cut for the cut pusruit algorithm.
 * `iso():`
 Currently unsupported.
 
-#### Primal Dual
+### Primal Dual
