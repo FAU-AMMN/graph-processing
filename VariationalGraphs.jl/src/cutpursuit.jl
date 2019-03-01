@@ -69,13 +69,13 @@ A parameter spcifiying the dimension of the given data. This is due to the
 development process of this project, as the data f0 has to be passed as a 
 one dimenionsl array, and hence the information is lost during the reshape 
 process. TR: We probably drop this procedure.
-- typeof(d) = Int64
+- typeof(d) = Int64.
 
 ## Data f0
 The Original input data. At this stage 
 multidimensional input has to be rehaped into this format, which might change 
 later.
-- typeof(f0) = Array{T, 1} where T <: Real
+- typeof(f0) = Array{T, 1} where T <: Real.
 
 ## Variational Graph g
 This variable stores the underlying graph, the algorithm should be 
