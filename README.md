@@ -13,8 +13,7 @@ Procedure for a cut pursuit algorithm with a primal dual approach
 A parameter spcifiying the dimension of the given data. This is due to the 
 development process of this project, as the data f0 has to be passed as a 
 one dimenionsl array, and hence the information is lost during the reshape 
-process. TR: We probably drop this procedure.
-- typeof(d) = Int64
+process. TR: We probably drop this procedure. typeof(d) = Int64.
 
 * `f0:`
 The Original input data. At this stage 
