@@ -6,8 +6,8 @@
 ```
 ToDo: Write DocString!
 """
-function primal_dual()
-    return 0
+function primal_dual(f::Array{T, 1}) where {T <: Real}
+    return f
 end
 ###############################################################################
 
@@ -148,6 +148,7 @@ function cutpursuit(d::Int64, f0::Array{T, 1}, g::VariationalGraph, w::Array{T, 
     for i = 1:g.num_edges
         add_edge!(G, E[1, i], E[2, i])
     end
+    
     ## Main Routine
     # Array for cut_inds
     B = falses(N)
@@ -162,7 +163,6 @@ function cutpursuit(d::Int64, f0::Array{T, 1}, g::VariationalGraph, w::Array{T, 
         # Gathers the edges that were cut
         cutedge = falses(g.num_edges)
         iter = 1
-        
         while iter <= 1 #&& ~isempty(find(cutedge==0,1))
             # Cut graph
             # Go through decoupled problems
@@ -206,7 +206,7 @@ function cutpursuit(d::Int64, f0::Array{T, 1}, g::VariationalGraph, w::Array{T, 
             num_edges_red = set_red_graph!(E_red, w_red, E[:, cutedge], w[cutedge], bins)
 
             #Compute primal dual on reduced problem
-            f = primal_dual()
+            f = primal_dual(f)
             
             iter += 1
         end

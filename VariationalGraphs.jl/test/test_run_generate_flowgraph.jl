@@ -1,6 +1,7 @@
 using DelimitedFiles
 using VariationalGraphs
 using LightGraphs
+using Debugger
 #------------------------------------------------
 display("Finished loading!")
 #------------------------------------------------
