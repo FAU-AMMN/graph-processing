@@ -3,6 +3,7 @@ module VariationalGraphs
 using SparseArrays
 using NearestNeighbors
 using LightGraphsFlows
+using Printf
 
 import LightGraphsFlows: 
 mincut
@@ -36,6 +37,7 @@ include("./knn_graph.jl")
 include("./epsilon_graph.jl")
 include("./variationalgraph.jl")
 include("./generate_flowgraph.jl")
+include("./primaldual.jl")
 include("./cutpursuit.jl")
 
 end # module

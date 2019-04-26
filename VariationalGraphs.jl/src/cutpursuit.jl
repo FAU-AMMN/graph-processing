@@ -1,16 +1,5 @@
 ###############################################################################
 
-"""
-```julia
-    primal_dual()
-```
-ToDo: Write DocString!
-"""
-function primal_dual(f::Array{T, 1}) where {T <: Real}
-    return f
-end
-###############################################################################
-
 function set_red_graph!(E_red::Array{U, 2}, w_red::Array{T, 1},
                                          E::Array{U, 2}, w::Array{T, 1}, 
                                          bins::Array{Int64, 1}) where {U <:Int, T <: Real}
