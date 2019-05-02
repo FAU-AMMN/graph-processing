@@ -23,13 +23,17 @@ cut_aniso, reg_aniso
 abstract type AbstractVariationalGraph{T<:Integer, U<:Real} end
 
 abstract type cut_type end
-
 abstract type reg_type end
 
 struct cut_aniso <: cut_type end
 struct cut_iso <: cut_type end
 
 struct reg_aniso <: cut_type end
+struct reg_iso <: cut_type end
+struct reg_aniso_aniso <: cut_type end
+struct reg_aniso_iso <: cut_type end
+struct reg_iso_aniso <: cut_type end
+struct reg_iso_iso <: cut_type end
 
 ###############################################################################
 
