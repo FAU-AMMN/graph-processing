@@ -1,4 +1,4 @@
-###############################################################################
+###################################################################################################
 
 function set_red_graph!(E_red::Array{U, 2}, w_red::Array{T, 1},
                                          E::Array{U, 2}, w::Array{T, 1}, 
@@ -24,7 +24,7 @@ function set_red_graph!(E_red::Array{U, 2}, w_red::Array{T, 1},
     return ct - 1
 end
 
-###############################################################################
+###################################################################################################
 
 function set_bins_f0_red!(bins::Array{U, 1}, f0_red::Array{T, 1}, f::Array{T, 1},
                     g::AbstractGraph{U}) where {U <:Int, T <: Real}
@@ -39,7 +39,7 @@ function set_bins_f0_red!(bins::Array{U, 1}, f0_red::Array{T, 1}, f::Array{T, 1}
     return length(ccmps)
 end 
 
-###############################################################################   
+###################################################################################################   
 
 """
 ```julia
@@ -112,7 +112,7 @@ See also: [`primal_dual`] (@ref),  [`generate_flowgraph`](@ref).
 """
 cutpursuit
 
-###############################################################################
+###################################################################################################
 
 function cutpursuit(d::Int64, f0::Array{T, 1}, g::VariationalGraph, w::Array{T, 1}, 
                     cutAlpha::T, nIter::Int64, cut::cut_aniso) where {T <: Real}
@@ -125,7 +125,7 @@ function cutpursuit(d::Int64, f0::Array{T, 1}, g::VariationalGraph, w::Array{T, 
             f[j] = mean
         end
     end
-    E = get_alt_edgerep(g)
+    E = g.edges_mat
     E_red = similar(E)
     w_red = similar(w)
     f0_red = zeros(N)
@@ -195,14 +195,14 @@ function cutpursuit(d::Int64, f0::Array{T, 1}, g::VariationalGraph, w::Array{T, 
             num_edges_red = set_red_graph!(E_red, w_red, E[:, cutedge], w[cutedge], bins)
 
             #Compute primal dual on reduced problem
-            f = primal_dual(f)
+            #f = primal_dual(f)
             
             iter += 1
         end
     end
 end
 
-###############################################################################
+###################################################################################################
 
 function cutpursuit(d::Int64, f0::Array{T, 1}, g::VariationalGraph, w::Array{T, 1}, 
                     cutAlpha, nIter::Int64, cut::cut_iso) where {T <: Real}

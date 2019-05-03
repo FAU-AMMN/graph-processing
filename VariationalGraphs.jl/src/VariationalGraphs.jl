@@ -22,12 +22,13 @@ cut_aniso, reg_aniso
 
 abstract type AbstractVariationalGraph{T<:Integer, U<:Real} end
 
+# structs to dispatch the cut type
 abstract type cut_type end
-abstract type reg_type end
-
 struct cut_aniso <: cut_type end
 struct cut_iso <: cut_type end
 
+# structs to dispatch the regularization type
+abstract type reg_type end
 struct reg_aniso <: cut_type end
 struct reg_iso <: cut_type end
 struct reg_aniso_aniso <: cut_type end
@@ -37,8 +38,7 @@ struct reg_iso_iso <: cut_type end
 
 ###############################################################################
 
-include("./knn_graph.jl")
-include("./epsilon_graph.jl")
+include("./constructgraph.jl")
 include("./variationalgraph.jl")
 include("./generate_flowgraph.jl")
 include("./primaldual.jl")

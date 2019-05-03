@@ -1,6 +1,6 @@
 ###############################################################################
 
-struct pd_params{T <:Real, U<:Int}
+struct pd_params{T<:Real, U<:Int64}
     gamma::T
     delta::T
     epsilon::T
@@ -8,31 +8,29 @@ struct pd_params{T <:Real, U<:Int}
     normK::T
     preconConstant::T
     tol::T
-    
-    p::Float64
-    q::Float64
-    
+    p::T
+    q::T
+    #
     niter::U
     niter_power::U
-    
-    verbose::Int16
-    setSize::Int16
-    update_interval::Int16
+    verbose::U
+    setSize::U
+    update_interval::U
     # Acceleration parameter
     # 2: StepsizeUpdate
     # 1: Preconditioning
     # else: None 
-    acceleration::Int16
+    acceleration::U
     # Error Type
     # 1: energy
     # 2: indifferent energy
     # 3: gap
     # 4: RMSE
     # 5: indifferent gap
-    err:Int16
-    
+    error::U
+    #
     powerit::Bool
-    
+    #
     reg::reg_type
 end
 
@@ -43,7 +41,7 @@ end
 ```
 ToDo: Write DocString!
 """
-function compute_norm(d::Int64, m::Int64, y::Array{T, 2}, E::Array{Int64, 2}, q::T, p::T, norm::reg_type)
+function compute_norm(d::Int64, m::Int64, y::Array{T, 2}, E::Array{Int64, 2}, q::T, p::T, norm::reg_type) where{T<:Real}
 # This function computes the different norms for different types of
 # minimization problems.
 #
@@ -69,7 +67,7 @@ end
 # When p is infinity the pq-norm is the max over the q norm
 if p == Inf
     normY = max(normY[:])
-elseif p !=1
+elseif p != 1
     normY = sum(normY[:] .^ p) .^ (1/p)
 end
 return normY
@@ -138,7 +136,7 @@ end
 Projection onto C
 ToDo: Write DocString!
 """
-function proj(d::U, m::U, y::Array{T, 2}, E::Arry{U, 2}, alpha::T, q::T, p::T, reg::reg_type) where{T<:Real, U<:Int64}
+function proj(d::U, m::U, y::Array{T, 2}, E::Array{U, 2}, alpha::T, q::T, p::T, reg::reg_type) where{T<:Real, U<:Int64}
     N = max(E[1, :])
     # Same distinction as in the paper
     if p == 1 && q == 1
@@ -150,18 +148,18 @@ function proj(d::U, m::U, y::Array{T, 2}, E::Arry{U, 2}, alpha::T, q::T, p::T, r
         nz = compute_norm(d, m, y, E, q/(q-1), 1, reg)
         proj!(d, m, y, nz, E, alpha, reg)
         
-            
-        elseif strcmp(type,'aniso-iso') % Norm of each row  <= alpha
-            z = alpha*z./repmat((max(alpha,nz)),1,d);
-        elseif strcmp(type,'iso-aniso') % Norm of a set of neighbors <= alpha
-            nz = reshape(nz,[],d);
-            z =  alpha*z./max(alpha,nz(E(:,1),:));
-        elseif strcmp(type,'iso-iso') % Norm of set of neigbors over all dimensions <= alpha
-            z = alpha*z./max(alpha, repmat(nz(E(:,1)),1,d));
-        end
-    elseif p ~= 1 && q ~= 1
-        % The projection projects the whole array into an alpha p*q*-ball
-        nz = ComputeNorm(z,N,E,type,q/(q-1),p/(p-1));
+#             
+#         elseif strcmp(type,'aniso-iso') % Norm of each row  <= alpha
+#             z = alpha*z./repmat((max(alpha,nz)),1,d);
+#         elseif strcmp(type,'iso-aniso') % Norm of a set of neighbors <= alpha
+#             nz = reshape(nz,[],d);
+#             z =  alpha*z./max(alpha,nz(E(:,1),:));
+#         elseif strcmp(type,'iso-iso') % Norm of set of neigbors over all dimensions <= alpha
+#             z = alpha*z./max(alpha, repmat(nz(E(:,1)),1,d));
+#         end
+    elseif p != 1 && q != 1
+        # The projection projects the whole array into an alpha p*q*-ball
+        #nz = ComputeNorm(z,N,E,type,q/(q-1),p/(p-1));
         z = alpha*z/max(alpha,nz);
     end
 end
@@ -174,56 +172,38 @@ function proj!(d::U, m::U, y::Array{T, 2}, nz::Array{T, 1}, E::Array{U, 2}, alph
     end
 end
 #----------------------------------------------------------------------------------------
-function proj!(d::U, m::U, y::Array{T, 2}, nz::Array{T, 1}, E::Array{U, 2}, alpha::T, norm::reg_aniso_aniso) where{T<:Real, U<:Int64}
-    for l = 1:d
-        for i = 1:m
-            y[l, i] = alpha * y[l, i] / max(alpha, nz[i])
-        end
-        z = alpha*z./repmat((max(alpha,nz)),1,d);
-    end
+# function proj!(d::U, m::U, y::Array{T, 2}, nz::Array{T, 1}, E::Array{U, 2}, alpha::T, norm::reg_aniso_aniso) where{T<:Real, U<:Int64}
+#     for l = 1:d
+#         for i = 1:m
+#             y[l, i] = alpha * y[l, i] / max(alpha, nz[i])
+#         end
+#         z = alpha*z./repmat((max(alpha,nz)),1,d);
+#     end
+# end
+
+###############################################################################
+
+
+function huber(nz, epsilon)
+
 end
 
 ###############################################################################
 
-function grad(d::Int64, f::Array{T, 1}, E::Array{Int64, 2}, w::Array{T, 1}) where T <: Real
-    m = div(size(f, 1), d)
-    gradf = Array{T, 2}(undef, d, size(E, 2))
-    for l = 1:d
-        for i = 1:size(E, 2)
-            gradf[l, i] = w[i] .* (f[E[2, i] +  (l - 1) * m] - f[E[1, i] + (l - 1) * m]);
-        end
-    end
-    return gradf
-end
-
-###############################################################################
-
-function divergence(d::Int64, m::Int64, gradf::Array{T, 2}, E::Array{Int64, 2}, w::Array{Int64, 1}) where T <: Real
-    divy = Array{T, 1}(undef, d * m)
-    for l = 1:d
-        for j = 1:size(E, 2)
-            divy[E[1, j] + (l - 1) * m] += 2 * w[j] * gradf[l, j]
-        end
-    end
-    return divy
-end
-
-###############################################################################
-
-function powerit_gradient(E, w, par.niter_power)
+function powerit_gradient(E, w, niter)
 
 end
 
 ###############################################################################
 
 function compute_primal(f::Array{T, 1}, f0::Array{T, 1}, E::Array{Int64, 1}, 
-                        w::Array{T, 1}, N::Int64 alpha::T, epsilon::T, q::T, p::T, reg::reg_type) where {T <:Real}
-    D  = 1/2 * sum((f - f0 .^ 2)
+                        w::Array{T, 1}, N::Int64, alpha::T, epsilon::T, q::T, p::T, reg::reg_type) where {T <:Real}
+    D  = 1/2 * sum(f - f0 .^ 2)
     gradf = grad(f, E, w)
     nz = compute_norm(gradf, N, E, q, p, reg)
     # Compute huber if acitve
     if epsilon > 0
-        nz = Huber(nz, epsilon)
+        nz = huber(nz, epsilon)
     end
     # Compute the regularizer
     R = sum(nz)
@@ -269,7 +249,7 @@ end
 ```
 ToDo: Write DocString!
 """
-function primal_dual(d::Int64, f::Array{T, 1}, w, E, params::pd_params) where {T <: Real}
+function primal_dual(d::Int64, f::Array{T, 1}, g::VariationalGraph, par::pd_params) where {T <: Real}
     m = div(length(f), d)
     # Original Data
     f0 = f
@@ -287,10 +267,10 @@ function primal_dual(d::Int64, f::Array{T, 1}, w, E, params::pd_params) where {T
     L = par.normK;
     # norm of K (HAS TO BE APPROXIMATED)
     if par.powerit == true && par.acceleration == 1
-        if P.nIter >= 1
-            L = powerit_gradient(E, w, par.niter_power)
+        if par.nIter >= 1
+            L = powerit_gradient(g, par.niter_power)
             if par.verbose >= 2
-                #fprintf('\t %s \n', ['Estimation of operator norm via power iterations is ' num2str(L)]);
+                #@sprintf('\t %s \n', ['Estimation of operator norm via power iterations is ' num2str(L)]);
             end
         end
     end 
@@ -312,8 +292,8 @@ function primal_dual(d::Int64, f::Array{T, 1}, w, E, params::pd_params) where {T
     # Set some value for gap
     err = 1000
     # Initialize y
-    y = grad(f, E, w)
-    divy = diveregnce(d, m, y, E, w)
+    y = grad(f, g)
+    divy = diveregnce(d, m, y, g)
     # Set the hubert update parameter h 
     if par.epsilon > 0
         h = 1 - par.delta
@@ -321,7 +301,7 @@ function primal_dual(d::Int64, f::Array{T, 1}, w, E, params::pd_params) where {T
         h = 1
     end
     #
-    primal = compute_primal(f, f0, E, w, m, par.alpha, par.epsilon, par.reg, par.q, par.p)
+    primal = compute_primal(f, f0, g, m, par.alpha, par.epsilon, par.reg, par.q, par.p)
     dual = compute_dual(y, divy, f0, par.alpha, par.epsilon)
     #
     gap = primal - dual
@@ -335,7 +315,7 @@ function primal_dual(d::Int64, f::Array{T, 1}, w, E, params::pd_params) where {T
         # Set f^k 
         f_old = f
         # Primal Update f^k+1
-        f = 1./(1 + tau .* 1) .*(f + tau .* (f0 + divy))
+        f = 1 ./(1 + tau .* 1) .*(f + tau .* (f0 + divy))
         # Dual Update y^k + 1
         y = proj(h * y + sigma .* grad(f + theta * (f - f_old), E, w), E, par.alpha, par.q, par.p, par.reg)
         # Update tau, simga and theta
@@ -349,16 +329,16 @@ function primal_dual(d::Int64, f::Array{T, 1}, w, E, params::pd_params) where {T
         #--------------------------------------------------------------------------------
         # Compute primal-dual gap
         if mod(iter, par.update_interval) == 0
-            primal = compute_primal(f, f0, E, w, m, par.alpha, par.epsilon, par.q, par.p, par.reg);
-            dual = compute_dual(y,divy,f0,P.alpha,P.epsilon); 
+            primal = compute_primal(f, f0, g, m, par.alpha, par.epsilon, par.q, par.p, par.reg);
+            dual = compute_dual(y,divy,f0,par.alpha,par.epsilon); 
             #
-            if par.err == 1 || par.err == 2 
-                err, s = compute_error(primal, primal_old, m, par.err)
+            if par.error == 1 || par.error == 2 
+                err, s = compute_error(primal, primal_old, m, par.error)
                 primal_old = primal
             else
                 gap_old = gap
                 gap  = primal - dual
-                err, s = compute_error(gap, gap_old, m, par.err)
+                err, s = compute_error(gap, gap_old, m, par.error)
             end
             #----------------------------------------------------------------------------
             if par.verbose >= 1
