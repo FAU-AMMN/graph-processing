@@ -20,8 +20,7 @@ edges = G.edges
 
 
 @time for u = 1:G.num_verts
-    c = colors[rand(1:length(colors))]
-    lines = points[:,edges[u]]
+    c = "0.7"
     plot(points[1,u], points[2,u], color = c, marker = "o")
     #annotate(string(u), (points[1,u], points[2,u]))
     for i = 1:length(edges[u])

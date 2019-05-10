@@ -342,7 +342,7 @@ function primal_dual(d::Int64, f::Array{T, 1}, g::VariationalGraph, par::pd_para
             end
             #----------------------------------------------------------------------------
             if par.verbose >= 1
-                printstyled(@printf("Finished iteration %d of at most %d iterations", iter, par.niter); color =:reverse)
+                printstyled(@sprintf("Finished iteration %d of at most %d iterations", iter, par.niter); color =:reverse)
             end
         end
         #--------------------------------------------------------------------------------

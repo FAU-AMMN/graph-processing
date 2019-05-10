@@ -37,8 +37,7 @@ end
 #------------------------------------------------
 VariationalGraph(num_verts::T, num_edges::T, edge_list::Array{Array{T, 1}, 1}, 
                  weight_list::Array{Array{U, 1}, 1}) where {T <: Integer, U <: Real} =
-VariationalGraph(num_verts::T, num_edges::T, edge_list::Array{Array{T, 1}, 1}, 
-                 weight_list::Array{Array{U, 1}, 1}, vargraphdef())                 
+VariationalGraph(num_verts, num_edges, edge_list, weight_list, vargraphdef())                 
 #------------------------------------------------
 VariationalGraph(num_edges::T, edges::Array{Array{T, 1}, 1}, weights::Array{Array{U, 1}, 1}) where {T <: Integer, U <: Real} = 
 VariationalGraph(length(edges), num_edges, edges, weights)
@@ -96,15 +95,15 @@ end
 ```
 Get alternative edge representation.
 """
-function list2mat(num_edges::T, e::Array{Array{T, 1}}, w::Array{Array{U, 1}, 1}) where{T<:Int64, U<:Float64} 
+function list2mat(num_edges::T, e::Array{Array{T, 1}, 1}, w::Array{Array{U, 1}, 1}) where{T<:Int64, U<:Float64} 
     edges = Array{Int64, 2}(undef, 2, num_edges)
-    weights = Array{Int64, 1}(undef, 1, num_edges)
+    weights = Array{Float64, 1}(undef, num_edges)
     i = 1
     for u = 1:length(e)
         for v = 1:length(e[u])
             weights[i] = w[u][v]
-            e[1, i] = u
-            e[2, i] = e[u][v]
+            edges[1, i] = u
+            edges[2, i] = e[u][v]
             i += 1
         end
     end
