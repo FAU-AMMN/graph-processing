@@ -36,7 +36,10 @@ function constructGraph(data::Dict, ngh::Dict, dist_fcts::Dict, weight_fcts::Dic
 end
 
 ###################################################################################################
-function VariationalGraph(f::Array{T, 2}) where T <: Real
+struct fivepoint<:GraphConfig end
+struct forward<:GraphConfig end
+
+function VariationalGraph(f::Array{T, 2}, conf::fivepoint) where T <: Real
     n, m = size(f)
     num_verts = n * m
     num_edges = 0
@@ -55,7 +58,48 @@ function VariationalGraph(f::Array{T, 2}) where T <: Real
             end
         end
     end
-    return VariationalGraph(num_verts, num_edges, edges_list, weights_list)
+    return VariationalGraph(num_verts, num_edges, edges_list, weights_list, conf)
+end
+
+###################################################################################################
+
+function VariationalGraph(f::Array{T, 2}, conf::forward) where T <: Real
+    n, m = size(f)
+    num_verts = n * m
+    num_edges = 0
+    edges_list = [Vector{Int64}() for _ in 1:num_verts]
+    weights_list = [Vector{Float64}() for _ in 1:num_verts]
+    for v = 1:num_verts
+        i = 1 + div(v - 1, m)
+        j = 1 + mod(v - 1, m)
+        for k = 0:1
+            for l = 0:1
+                if (abs(k + l) == 1) && (1 <= i + k <= n) && (1 <= j + l <= m) #node itself is not included in neigbours
+                    push!(edges_list[v], (i + k - 1) * m + (j + l))
+                    push!(weights_list[v], 1)
+                    num_edges += 1
+                end
+            end
+        end
+    end
+    return VariationalGraph(num_verts, num_edges, edges_list, weights_list, conf)
+end
+
+
+function gradient(x::Array{T, 1}, g::VariationalGraph, conf::forward) where T <: Real 
+    gradx = Array{T, 1}(undef, g.num_edges)
+    for i = 1:g.num_edges
+        gradx[i] = g.weights_mat[i] * (x[g.edges_mat[1, i]] - x[g.edges_mat[2, i]])
+    end
+    return gradx
+end
+
+function divergence(y::Array{T, 1}, g::VariationalGraph, conf::forward) where T <: Real 
+    divy = Array{T, 1}(undef, g.num_verts)
+    for i = 1:g.num_edges
+        divy[E[1, i]] += 2 * g.weights_mat[i] * y[i]
+    end
+    return divy
 end
 ###################################################################################################
 """

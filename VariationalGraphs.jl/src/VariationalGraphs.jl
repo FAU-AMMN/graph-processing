@@ -1,9 +1,10 @@
 module VariationalGraphs
 
-using SparseArrays
-using NearestNeighbors
+using Distances
 using LightGraphsFlows
+using NearestNeighbors
 using Printf
+using SparseArrays
 
 import LightGraphsFlows: 
 mincut
@@ -14,9 +15,13 @@ strongly_connected_components, connected_components
 import NearestNeighbors: 
 KDTree, BallTree, BruteTree, knn, inrange
 
+import Distances:
+euclidean
+
 export AbstractVariationalGraph, constructGraph, VariationalGraph, getadjMat, undirect,
-generate_flowgraph, cutpursuit,
-cut_aniso, reg_aniso
+generate_flowgraph, cutpursuit, primaldual,
+cut_aniso, reg_aniso, pd_params,
+fivepoint, forward
 
 ###############################################################################
 
