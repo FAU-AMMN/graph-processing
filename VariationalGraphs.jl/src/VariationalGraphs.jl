@@ -20,7 +20,8 @@ euclidean
 
 export AbstractVariationalGraph, constructGraph, VariationalGraph, getadjMat, undirect,
 generate_flowgraph, cutpursuit, primaldual,
-cut_aniso, reg_aniso, pd_params,
+cut_aniso, reg_aniso, 
+pd_params, img_params,
 fivepoint, forward
 
 ###############################################################################
