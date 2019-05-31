@@ -80,6 +80,12 @@ function VariationalGraph(n::Int64, m::Int64, f::Array{T, 1}, conf::forward) whe
                 end
             end
         end
+        # Neumann boundary condition
+        while length(edges_list[v]) < 2
+           push!(edges_list[v], v)
+           push!(weights_list[v], 1)
+           num_edges += 1
+        end
     end
     return VariationalGraph(num_verts, num_edges, edges_list, weights_list, conf)
 end
@@ -92,15 +98,16 @@ end
 function gradient(x::Array{T, 1}, g::VariationalGraph, conf::forward) where T <: Real 
     gradx = Array{T, 1}(undef, g.num_edges)
     for i = 1:g.num_edges
-        gradx[i] = g.weights_mat[i] * (x[g.edges_mat[1, i]] - x[g.edges_mat[2, i]])
+        gradx[i] = g.weights_mat[i] * (x[g.edges_mat[2, i]] - x[g.edges_mat[1, i]])
     end
     return gradx
 end
 
 function divergence(y::Array{T, 1}, g::VariationalGraph, conf::forward) where T <: Real 
-    divy = Array{T, 1}(undef, g.num_verts)
+    divy = zeros(g.num_verts)
     for i = 1:g.num_edges
-        divy[g.edges_mat[1, i]] += 2 * g.weights_mat[i] * y[i]
+        divy[g.edges_mat[1, i]] += g.weights_mat[i] * y[i]
+        divy[g.edges_mat[2, i]] += g.weights_mat[i] * y[i]
     end
     return divy
 end

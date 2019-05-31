@@ -3,7 +3,8 @@ using VariationalGraphs
 using LightGraphs
 using PyPlot
 using Printf
-printstyled(@sprintf("Finished Loading\n"); color =:reverse)
+printstyled(@sprintf("Finished loading!\n"); color =:reverse)
+printstyled(@sprintf("Startet calculating!\n"); color =:reverse)
 # Loading +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Set data
 I = readdlm("../data/cameraman.txt", Float64)
@@ -14,18 +15,23 @@ g = VariationalGraph(n, m, f, forward())
 # Store parameters in img_params struct
 
 # Set parameters for pd algorithm
-par = img_params(0.35, 0.35, 1.0, 1e-07, 100.0, 4, f, g)
+par = img_params(0.35, 0.35, 1.0, 1e-07, 100.0, 40, f, g)
 # Apply PD algorithm ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 x = zeros(size(f))
 y = VariationalGraphs.gradient(x, g, g.config)
 u, hist = primaldual(x, y, par);
-u = reshape(u, n, m)
+w = reshape(u, n, m)
 
-# PyPlot.close("all")
-# PyPlot.imshow(I, cmap="gray")
-# PyPlot.figure()
-# PyPlot.imshow(u, cmap="gray")
-maximum(I - u)
+printstyled(@sprintf("Finished calculating!\n"); color =:reverse)
+printstyled(@sprintf("Started visualization!\n"); color =:reverse)
+# Visualization +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+PyPlot.close("all")
+PyPlot.figure()
+PyPlot.imshow(I, cmap="gray")
+PyPlot.figure()
+PyPlot.imshow(w, cmap="gray")
+PyPlot.figure()
+PyPlot.plot(hist.energy)
 
 
 
