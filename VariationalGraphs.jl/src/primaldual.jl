@@ -94,7 +94,7 @@ function primaldual(x::Array{T, 1}, y::Array{T, 1}, par::P) where{T<:Real, U<:In
         # Update iter and history
         iter += 1
         img_histiory_add!(history, iter, rel_change, 
-                          0.5 * sum((x - par.f) .^ 2) + par.lambda * sum(pd_op(x, par) .^ 2), 
+                          0.5 * sum((x - par.f) .^ 2) + par.lambda * sqrt(sum(pd_op(x, par) .^ 2)), 
                           x, x_bar, y)
         # Save old x TR: We could use hist here
         x_old = x

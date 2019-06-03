@@ -8,6 +8,7 @@ printstyled(@sprintf("Startet calculating!\n"); color =:reverse)
 # Loading +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Set data
 I = readdlm("../data/cameraman.txt", Float64)
+#I = I[40:70, 60:100]
 n, m = size(I)
 f = reshape(I, n * m)
 g = VariationalGraph(n, m, f, forward())
@@ -15,7 +16,7 @@ g = VariationalGraph(n, m, f, forward())
 # Store parameters in img_params struct
 
 # Set parameters for pd algorithm
-par = img_params(0.35, 0.35, 1.0, 1e-07, 100.0, 40, f, g)
+par = img_params(0.35, 0.35, 1.0, 1e-07, 100.0, 1000, f, g)
 # Apply PD algorithm ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 x = zeros(size(f))
 y = VariationalGraphs.gradient(x, g, g.config)
