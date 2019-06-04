@@ -98,7 +98,7 @@ end
 function gradient(x::Array{T, 1}, g::VariationalGraph, conf::forward) where T <: Real 
     gradx = Array{T, 1}(undef, g.num_edges)
     for i = 1:g.num_edges
-        gradx[i] = g.weights_mat[i] * (x[g.edges_mat[2, i]] - x[g.edges_mat[1, i]])
+        @inbounds gradx[i] = g.weights_mat[i] * (x[g.edges_mat[2, i]] - x[g.edges_mat[1, i]])
     end
     return gradx
 end
@@ -106,8 +106,8 @@ end
 function divergence(y::Array{T, 1}, g::VariationalGraph, conf::forward) where T <: Real 
     divy = zeros(g.num_verts)
     for i = 1:g.num_edges
-        divy[g.edges_mat[1, i]] += g.weights_mat[i] * y[i]
-        divy[g.edges_mat[2, i]] -= g.weights_mat[i] * y[i]
+        @inbounds divy[g.edges_mat[1, i]] += g.weights_mat[i] * y[i]
+        @inbounds divy[g.edges_mat[2, i]] -= g.weights_mat[i] * y[i]
     end
     return divy
 end

@@ -12,6 +12,7 @@ struct img_params{T<:Real, U<:Integer} <: pd_params{T, U}
     lambda::T
     #
     maxiter::U
+    history_step::U
     #
     f::Array{T, 1}
     #
@@ -29,15 +30,17 @@ struct img_history{T<:Real, U<:Integer} <: pd_history{T, U}
     iter::Vector{U}
 end
 # Constructor for initialization
-function img_history(maxiter::U, x::Array{T, 1}, y::Array{T, 1}) where{T<:Real, U<:Integer}
-    X = zeros(maxiter + 1, length(x)); X[1, :] = x;
-    X2 = zeros(maxiter + 1, length(x)); X[1, :] = x;
-    Y = zeros(maxiter + 1, length(y)); Y[1, :] = y;
-    return img_history(X, X2, Y, zeros(maxiter + 1), zeros(maxiter + 1), maxiter, [1])
+function img_history(maxiter::U, history_step::U, x::Array{T, 1}, y::Array{T, 1}) where{T<:Real, U<:Integer}
+    size = div(maxiter, history_step) + 1
+    X = zeros(size, length(x)); X[1, :] = x;
+    X2 = zeros(size, length(x)); X[1, :] = x;
+    Y = zeros(size, length(y)); Y[1, :] = y;
+    return img_history(X, X2, Y, zeros(size), zeros(size), size, [1])
 end
 # Add a iteration step to the history
-function img_histiory_add!(hist::img_history, iter::U, rel_change::T, energy::T, 
+function img_histiory_add!(hist::img_history, rel_change::T, energy::T, 
                           x::Array{T, 1}, x_bar::Array{T, 1}, y::Array{T, 1}) where{T<:Real, U<:Integer}
+    iter =  hist.iter[1] + 1
     if iter <= hist.maxiter
         hist.x[iter, :] = x
         hist.x_bar[iter, :] = x_bar
@@ -80,9 +83,9 @@ end
 ToDo: Write DocString!
 """
 function primaldual(x::Array{T, 1}, y::Array{T, 1}, par::P) where{T<:Real, U<:Integer, P<:pd_params{T, U}}
-    # Initilaize history
-    history = img_history(par.maxiter, x, y)
-    # Initialization 
+    # Initilaize history.
+    history = img_history(par.maxiter, par.history_step, x, y)
+    # Initialization.
     x_old = x; x_bar = x
     iter = 1
     rel_change = par.threshold + 1
@@ -91,12 +94,14 @@ function primaldual(x::Array{T, 1}, y::Array{T, 1}, par::P) where{T<:Real, U<:In
         x = prox_G(x + par.tau * pd_trans_op(y, par), par)
         x_bar = x + par.theta * (x - x_old)
         rel_change = compute_norm(x - x_old, par) / compute_norm(x, par)
-        # Update iter and history
         iter += 1
-        img_histiory_add!(history, iter, rel_change, 
-                          0.5 * sum((x - par.f) .^ 2) + par.lambda * sqrt(sum(pd_op(x, par) .^ 2)), 
-                          x, x_bar, y)
-        # Save old x TR: We could use hist here
+        # Uüdate history every history_step.
+        if iter%par.history_step == 0
+            img_histiory_add!(history, rel_change, 
+                              0.5 * sum((x - par.f) .^ 2) + par.lambda * sqrt(sum(pd_op(x, par) .^ 2)), 
+                              x, x_bar, y)
+        end
+        # Save old x
         x_old = x
     end
     return x, history
