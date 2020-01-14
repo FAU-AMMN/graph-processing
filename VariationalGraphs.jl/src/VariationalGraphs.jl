@@ -2,27 +2,30 @@ module VariationalGraphs
 
 using Distances
 using LightGraphsFlows
+using LightGraphs
 using NearestNeighbors
 using Printf
 using SparseArrays
 
-import LightGraphsFlows: 
+import LightGraphsFlows:
 mincut
 import LightGraphs:
 DiGraph, AbstractGraph, add_edge!, rem_edge!, edges,
 strongly_connected_components, connected_components
 
-import NearestNeighbors: 
+import NearestNeighbors:
 KDTree, BallTree, BruteTree, knn, inrange
 
 import Distances:
 euclidean
 
 export AbstractVariationalGraph, constructGraph, VariationalGraph, getadjMat, undirect,
-generate_flowgraph, cutpursuit, primaldual,
-cut_aniso, reg_aniso, 
-pd_params, img_params,
-fivepoint, forward
+generate_flowgraph, cutpursuit, cutpursuit2, primaldual, red_primaldual,
+cut_aniso, reg_aniso,
+pd_params, img_params, red_params,
+fivepoint, forward,
+fivepointweighted, nonlocal,
+kn
 
 ###############################################################################
 
@@ -46,8 +49,15 @@ struct reg_iso_iso <: cut_type end
 
 include("./variationalgraph.jl")
 include("./constructgraph.jl")
-include("./generate_flowgraph.jl")
+#include("./generate_flowgraph.jl")
 include("./primaldual.jl")
-include("./cutpursuit.jl")
+include("./red_primaldual.jl")
+#include("./cutpursuit.jl")
+####test
+include("./cutpursuit2.jl")
+include("./generate_flowgraph2.jl")
+include("./generate_redgraph.jl")
+####
+include("./diffusiondenoising.jl")
 
 end # module

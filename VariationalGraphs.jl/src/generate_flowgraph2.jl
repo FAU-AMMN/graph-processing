@@ -1,8 +1,9 @@
 ###############################################################################
 
-function generate_flowgraph(d::Int64, f0::Array{T, 1}, w0::Array{T, 1}, f::Array{T, 1},
+function generate_flowgraph2(d::Int64, f0::Array{T, 1}, w0::Array{T, 1}, f::Array{T, 1},
                                   g::VariationalGraph, alpha::T, reg::reg_aniso) where {T <: Real}
     N = d * g.num_verts
+    #show(N)
     gradJS = zeros(d * g.num_verts)
     Sc = falses(d * g.num_edges)
     flowgraph = DiGraph(N + 2)
@@ -13,14 +14,14 @@ function generate_flowgraph(d::Int64, f0::Array{T, 1}, w0::Array{T, 1}, f::Array
         off  = (i - 1) * g.num_verts
         for u = 1:g.num_verts
             acc = 0
-            for v = 1:length(g.edges[u])
-                tmp = f[u + off] - f[g.edges[u][v] + off]
+            for v = 1:length(g.edges_list[u])
+                tmp = f[u + off] - f[g.edges_list[u][v] + off]
                 if abs(tmp) >= 1e-10
                     acc += sign(tmp) * w0[u]
                 else
-                    add_edge!(flowgraph, u, g.edges[u][v])
-                    capacity_matrix[u + off, g.edges[u][v] + off] =
-                         alpha * sqrt(w0[u]) # really time 0.5?? (1/2)*  sqrt???
+                    add_edge!(flowgraph, u, g.edges_list[u][v])
+                    capacity_matrix[u + off, g.edges_list[u][v] + off] =
+                         alpha * w0[u]# eventuel ohne (1/2)* sqrt
                     Sc[ect] = true
                 end
                 ect += 1
@@ -120,4 +121,4 @@ Array that stores wheter a corresponding edge produces a zero value.
 # Examples
 ToDo
 """
-generate_flowgraph
+generate_flowgraph2
